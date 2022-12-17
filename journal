@@ -1,23 +1,8 @@
 #!/usr/bin/env bb
 
-(require '[babashka.fs :as fs])
 (require '[babashka.cli :as cli])
-(require '[clojure.edn :as edn])
-
-(def ENTRIES-LOCATION "entries.edn")
-
-(defn read-entries
-      []
-      (if (fs/exists? ENTRIES-LOCATION)
-          (edn/read-string (slurp ENTRIES-LOCATION))
-          []))
-
-(defn add-entry
-      [opts]
-      (let [entries (read-entries)]
-           (spit ENTRIES-LOCATION
-                 (conj entries (merge  {:timestamp (System/currentTimeMillis)}
-                                       opts)))))
+(require '[journal.add :as add])
+(require '[journal.list :as list])
 
 (def cli-opts
      {:entry     {:alias :e
@@ -27,9 +12,9 @@
                   :desc "A unix timestamp, when you recorded this."
                   :coerce {:timestamp :long}}})
 
-
 (def table
-     [{:cmds ["add"] :fn (fn [m] (add-entry (:opts m)))}])
+     [{:cmds ["add"]  :fn  #(add/add-entry (:opts %))}
+      {:cmds ["list"] :fn  #(list/list-entries (:opts %))}])
 
 (cli/dispatch table
               *command-line-args*
