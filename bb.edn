@@ -1,1 +1,3 @@
-{:paths ["src"]}
+{:paths ["src"]
+ :tasks {:requires ([babashka.fs :as fs])
+         clear     (fs/delete-if-exists "entries.edn")}}
